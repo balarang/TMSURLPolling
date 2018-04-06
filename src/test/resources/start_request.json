@@ -1,0 +1,26 @@
+{
+  "type":"START",
+  "shipment_id": 3976,
+  "portal_id":7890,
+  "reference_numbers": {
+    "tracking": "SL100062063",
+    "broker":"SL100062063"
+  },
+  "job_name": "SchneiderVisibiliyAPI",
+  "job_class_name": "com.overhaul.integration.polling.job.schneider.SchneiderVisibiliyAPIPollJob",
+  "job_url": "https://uat-order-status-service.azurewebsites.net/api/Orders?Orderids",
+  "access": {
+    "token": "abcde"
+  },
+  "poll_time_in_minutes":"1",
+  "params": [
+    {
+      "key": "abc",
+      "value": "123"
+    },
+    {
+      "key": "xyz",
+      "value": "987"
+    }
+  ]
+}
