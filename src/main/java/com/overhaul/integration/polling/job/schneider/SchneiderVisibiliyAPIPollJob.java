@@ -21,6 +21,7 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -62,37 +63,40 @@ public class SchneiderVisibiliyAPIPollJob extends JobBase {
                     //else convert JSON String to
                     // OH backend format and HTTP Post it OH backend
                     if( responseObj.length > 0 ) {
-                        //output("Adding devices");
-                        
-                        //addDevice(responseObj[0]);
                         SmartTruckEvent evt = SchneiderVisibilityMapper.INSTANCE.convertToSmartTruckEvent( responseObj[0] );
                         ContentTypeHandler<SmartTruckEvent> evtHandler = new ContentTypeHandler<>();
 
                         //Map Scehndier status to OH status
                         evt.getShipment().setStatus( statusMap.get( evt.getShipment().getStatus() ));
+                        evt.setEvtDateTime(Calendar.getInstance());
 
                         String jsonToBackend = evtHandler.marshal( MediaType.APPLICATION_JSON, evt, SmartTruckEvent.class);
                         output( "Final JSON sent to OH :"+ jsonToBackend );
                         HttpResponse<String> httpResponse = post(jsonToBackend, createHttpHeaders());
                         int httpStatus = httpResponse.getStatusCode();
                         output(String.format("HTTP status: %d, Entity: %s", httpStatus, httpResponse.getEntity()));
+                        if( httpStatus != Response.Status.OK.getStatusCode()) {
+                            sendBackendFailureNotification( httpStatus, httpResponse.getEntity(), null);
+                        }
                     }
                 }
             } else {
                 String responseMsg = response.readEntity(String.class);
                 output(String.format("Response status %d, Reason %s :", response.getStatus(), responseMsg));
-                //notifyFailure( response.getStatus(), responseMsg, null );
+                sendPollFailureNotification( response.getStatus(), responseMsg, null );
                 //notifyFailure( responseMsg );
             }
         } catch(JobExecutionException jex ){
             jex.printStackTrace();
-            logger.error("Cannot complete poll job. Reason: ", jex.toString() );
-            //notifyFailure( jex.toString() );
+            String errorMsg = String.format( "Error in completing poll job for Shipment ID %s . Reason: %s", shipmentId , jex.toString());
+            logger.error(errorMsg);
+            notifyFailure( errorMsg );
         }
         catch(Exception ex ){
             ex.printStackTrace();
-            logger.error("Cannot process JSON response", ex.toString() );
-            //notifyFailure( ex.toString() );
+            String errorMsg = String.format( "Error in completing poll job for Shipment ID %s . Reason: %s", shipmentId , ex.toString());
+            logger.error( errorMsg );
+            notifyFailure( errorMsg );
         }
         finally {
             if (response!=null) {
@@ -112,7 +116,7 @@ public class SchneiderVisibiliyAPIPollJob extends JobBase {
 
         Invocation.Builder invocationBuilder = client
                 .target(getUrl())
-                .queryParam(ORDER_IDS,getBrokerReference())
+                .queryParam(ORDER_IDS, brokerReference )
                 .request(MediaType.APPLICATION_JSON)
                 .header(HttpHeaders.AUTHORIZATION, BEARER+ accessToken );
 
@@ -131,7 +135,7 @@ public class SchneiderVisibiliyAPIPollJob extends JobBase {
         return token;
     }
 
-    private void addDevice( SchneiderVisibilityAPIResponse response ) throws Exception {
+    /*private void addDevice( SchneiderVisibilityAPIResponse response ) throws Exception {
         String name = response.getEquipmentId();
         String imei = name;
         String type = "trailer";
@@ -147,12 +151,12 @@ public class SchneiderVisibiliyAPIPollJob extends JobBase {
         String putJSON = handler.marshal(MediaType.APPLICATION_JSON, mastershipment, Mastershipment.class);
         output("Add device JSON :" + putJSON);
 
-        String url = String.format(System.getProperty("OH_URL_BY_BROKER_REF"), getBrokerReference());
+        String url = String.format(System.getProperty("OH_URL_BY_BROKER_REF"), brokerReference);
         output( "PUT URL: " + url );
         HttpResponse<String> httpResponse = put(url, putJSON);
         int httpStatus = httpResponse.getStatusCode();
         output(String.format("HTTP status: %d, Entity: %s", httpStatus, httpResponse.getEntity()));
-    }
+    }*/
 
     public Map<String, String> createHttpHeaders() throws Exception {
         Map<String, String> headers = new HashMap<>();

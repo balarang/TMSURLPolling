@@ -1,5 +1,7 @@
 package com.overhaul.integration.polling.job;
 
+import com.amazonaws.auth.AWSCredentials;
+import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.sns.AmazonSNSClient;
 import com.amazonaws.services.sns.model.PublishRequest;
 import com.amazonaws.services.sns.model.PublishResult;
@@ -21,21 +23,24 @@ public abstract class JobBase implements Job {
     public static final String BROKER_REFERENCE = "BROKER_REFERENCE";
     public static final String PORTAL_ID = "PORTAL_ID";
     public static final String URL = "URL";
-//    public static final String ACCESS_TOKEN = "ACCESS_TOKEN";
     public static final String SHIPMENT_ID = "SHIPMENT_ID";
 
     public static final String X_API_KEY = "x-api-key";
     public static final String X_CREATED_TIME = "x-created-time";
 
-    private String brokerReference;
-    private int portalId;
-    private String url;
-    private int shipmentId;
+    protected String brokerReference;
+    protected int portalId;
+    protected String url;
+    protected int shipmentId;
 
     private AmazonSNSClient snsClient = null;
 
     public JobBase() {
-
+        //create a new SNS client with credentials
+        AWSCredentials awsCreds = new BasicAWSCredentials(
+                System.getProperty("SNSWRITER_ACCESS_KEY"),
+                System.getProperty("SNSWRITER_SECRET_KEY") );
+        snsClient = new AmazonSNSClient(awsCreds);
     }
 
     protected void parseBasic( JobExecutionContext jobExecutionContext ) {
@@ -43,26 +48,20 @@ public abstract class JobBase implements Job {
         brokerReference = map.getString(BROKER_REFERENCE);
         portalId = map.getInt( PORTAL_ID );
         url = map.getString( URL );
-
         shipmentId = map.getInt( SHIPMENT_ID );
-
-        //create a new SNS client with credentials
-       /* AWSCredentials awsCreds = new BasicAWSCredentials( System.getProperty("SNSWRITER_ACCESS_KEY"),
-                System.getProperty("SNSWRITER_SECRET_KEY") );
-        snsClient = new AmazonSNSClient(awsCreds);*/
     }
 
     private void validateMandatoryFields(){
 
     }
 
-    public String getBrokerReference() {
+    /*public String getBrokerReference() {
         return brokerReference;
     }
 
     public int getPortalId() {
         return portalId;
-    }
+    }*/
 
     public String getUrl() {
         return url;
@@ -97,16 +96,45 @@ public abstract class JobBase implements Job {
 
     public abstract Map<String,String> createHttpHeaders() throws Exception ;
 
-    protected void sendNotification(int httpStatus, String httpResponse, Map<String,String> mapValues ) {
+    protected void sendPollSuccessNotification(int httpStatus, String httpResponse, Map<String,String> mapValues ) {
+        sendPollNotification( httpStatus, httpResponse, mapValues, true);
+    }
+
+    protected void sendPollFailureNotification(int httpStatus, String httpResponse, Map<String,String> mapValues ) {
+        sendPollNotification( httpStatus, httpResponse, mapValues, false);
+    }
+
+    protected void sendBackendSuccessNotification(int httpStatus, String httpResponse, Map<String,String> mapValues ) {
+        sendBackendPostNotification( httpStatus, httpResponse, mapValues, true);
+    }
+
+    protected void sendBackendFailureNotification(int httpStatus, String httpResponse, Map<String,String> mapValues ) {
+        sendBackendPostNotification( httpStatus, httpResponse, mapValues, false);
+    }
+
+    private void sendBackendPostNotification( int httpStatus, String httpResponse, Map<String,String> mapValues, boolean notificationType ) {
+        sendNotification("HTTP Post:", httpStatus, httpResponse, mapValues, notificationType );
+    }
+
+    private void sendPollNotification( int httpStatus, String httpResponse, Map<String,String> mapValues, boolean notificationType ) {
+        sendNotification("URL Polling:", httpStatus, httpResponse, mapValues, notificationType );
+    }
+
+    private void sendNotification(String prefixString, int httpStatus, String httpResponse, Map<String,String> mapValues, boolean successNotification ) {
         //publish to an SNS topic
         String title = String.format(
-                "Notification for ShipmentID %s. URL Poll returned with status %s and response %s\n",
+                "Notification for Shipment ID %s. HTTP call returned with status %s and response %s\n",
                 shipmentId, httpStatus, httpResponse ) ;
-        StringBuffer message = new StringBuffer().append( title );
-        mapValues.entrySet().forEach(
-                elem -> message.append(elem.getKey()).append("=").append(elem.getValue() ).append("\n") );
-        notifyFailure( message.toString() );
-        logger.info("Message published to failure SNS topic");
+        StringBuffer message = new StringBuffer(prefixString).append( title );
+        if( mapValues !=null ) {
+            mapValues.entrySet().forEach(
+                    elem -> message.append(elem.getKey()).append("=").append(elem.getValue()).append("\n"));
+        }
+        if( successNotification ) {
+            notifySuccess( message.toString() );
+        } else {
+            notifyFailure(message.toString());
+        }
     }
 
     protected void notifySuccess(String message ){
