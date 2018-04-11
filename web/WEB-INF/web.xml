@@ -6,9 +6,7 @@
          version="3.0">
     <servlet>
         <servlet-name>URLPollingRESTService</servlet-name>
-        <servlet-class>
-            org.glassfish.jersey.servlet.ServletContainer
-        </servlet-class>
+        <servlet-class>org.glassfish.jersey.servlet.ServletContainer</servlet-class>
         <init-param>
             <param-name>jersey.config.server.provider.packages</param-name>
             <param-value>com.overhaul.integration.rest</param-value>

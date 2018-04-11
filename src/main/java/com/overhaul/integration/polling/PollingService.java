@@ -15,9 +15,9 @@ public class PollingService {
 
     public void startPolling(Scheduler scheduler, PollRequest pollRequest) throws Exception {
         validatePollRequest( pollRequest );
-        System.out.println("Job Class name :"+ pollRequest.getJob_class_name() );
+        //System.out.println("Job Class name :"+ pollRequest.getJob_class_name() );
         Class<? extends Job> clazz = (Class<? extends Job>) Class.forName(pollRequest.getJob_class_name());
-        System.out.println("Job Class loaded "+ clazz );
+        //System.out.println("Job Class loaded "+ clazz );
         JobKey jobKey = new JobKey(pollRequest.getJob_name());
 
         //Set the scheduler timings.

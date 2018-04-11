@@ -47,8 +47,8 @@ public abstract class JobBase implements Job {
         shipmentId = map.getInt( SHIPMENT_ID );
 
         //create a new SNS client with credentials
-       /* AWSCredentials awsCreds = new BasicAWSCredentials( System.getenv("SNSWRITER_ACCESS_KEY"),
-                System.getenv("SNSWRITER_SECRET_KEY") );
+       /* AWSCredentials awsCreds = new BasicAWSCredentials( System.getProperty("SNSWRITER_ACCESS_KEY"),
+                System.getProperty("SNSWRITER_SECRET_KEY") );
         snsClient = new AmazonSNSClient(awsCreds);*/
     }
 
@@ -69,11 +69,11 @@ public abstract class JobBase implements Job {
     }
 
     public String getURL() {
-        return System.getenv("OH_URL");
+        return System.getProperty("OH_URL");
     }
 
     public String getAuth() {
-        return System.getenv("OH_AUTHORIZATION");
+        return System.getProperty("OH_AUTHORIZATION");
     }
 
     public HttpResponse<String> post(String json, Map<String, String> headers) {
@@ -110,11 +110,11 @@ public abstract class JobBase implements Job {
     }
 
     protected void notifySuccess(String message ){
-        publish( System.getenv("SUCCESS_TOPIC_SNS_ARN"), message );
+        publish( System.getProperty("SUCCESS_TOPIC_SNS_ARN"), message );
     }
 
     protected void notifyFailure(String message ){
-        publish( System.getenv("FAILURE_TOPIC_SNS_ARN"), message );
+        publish( System.getProperty("FAILURE_TOPIC_SNS_ARN"), message );
     }
 
     private PublishResult publish(String topicARN, String message) {

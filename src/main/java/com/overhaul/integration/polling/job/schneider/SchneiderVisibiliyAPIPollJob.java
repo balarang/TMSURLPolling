@@ -62,7 +62,7 @@ public class SchneiderVisibiliyAPIPollJob extends JobBase {
                     //else convert JSON String to
                     // OH backend format and HTTP Post it OH backend
                     if( responseObj.length > 0 ) {
-                        output("Adding devices");
+                        //output("Adding devices");
                         
                         //addDevice(responseObj[0]);
                         SmartTruckEvent evt = SchneiderVisibilityMapper.INSTANCE.convertToSmartTruckEvent( responseObj[0] );
@@ -147,7 +147,7 @@ public class SchneiderVisibiliyAPIPollJob extends JobBase {
         String putJSON = handler.marshal(MediaType.APPLICATION_JSON, mastershipment, Mastershipment.class);
         output("Add device JSON :" + putJSON);
 
-        String url = String.format(System.getenv("OH_URL_BY_BROKER_REF"), getBrokerReference());
+        String url = String.format(System.getProperty("OH_URL_BY_BROKER_REF"), getBrokerReference());
         output( "PUT URL: " + url );
         HttpResponse<String> httpResponse = put(url, putJSON);
         int httpStatus = httpResponse.getStatusCode();

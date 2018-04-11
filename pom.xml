@@ -103,11 +103,12 @@
             <artifactId>quartz</artifactId>
             <version>2.3.0</version>
         </dependency>
-        <!--<dependency>
-            <groupId>org.glassfish.jersey.core</groupId>
-            <artifactId>jersey-client</artifactId>
+        <!-- https://mvnrepository.com/artifact/org.glassfish.jersey.containers/jersey-container-servlet-core -->
+        <dependency>
+            <groupId>org.glassfish.jersey.containers</groupId>
+            <artifactId>jersey-container-servlet-core</artifactId>
             <version>2.26</version>
-        </dependency>-->
+        </dependency>
         <dependency>
             <groupId>com.overhaul</groupId>
             <artifactId>integration-tms-helper</artifactId>
