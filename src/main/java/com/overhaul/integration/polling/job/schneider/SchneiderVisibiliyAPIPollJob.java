@@ -36,7 +36,6 @@ public class SchneiderVisibiliyAPIPollJob extends JobBase {
 
     static {
         statusMap.put("In-Transit", "ENROUTE_TO_DELIVERY");
-        statusMap.put("Delivered", "DELIVERED");
         statusMap.put("Complete", "DELIVERED");
     }
 
