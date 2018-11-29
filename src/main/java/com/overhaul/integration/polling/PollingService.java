@@ -55,7 +55,7 @@ public class PollingService {
         System.out.println("job deleted for "+ pollRequest.getShipmentId() );*/
     }
 
-    public void updatePollTime( Scheduler scheduler, PollRequest pollRequest ) throws Exception {
+    public void updatePolling( Scheduler scheduler, PollRequest pollRequest ) throws Exception {
         TriggerKey triggerKey = createTriggerKey( pollRequest );
         JobKey jobKey = new JobKey(pollRequest.getJob_name());
         //Set the scheduler timings.

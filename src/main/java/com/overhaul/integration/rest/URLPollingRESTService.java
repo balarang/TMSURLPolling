@@ -53,7 +53,10 @@ public class URLPollingRESTService {
             } else if (pollRequest.getPollRequestType() == PollRequestType.STOP) {
                 output("STOP");
                 service.stopPolling(scheduler, pollRequest);
-            } else {
+            } else if (pollRequest.getPollRequestType() == PollRequestType.UPDATE) {
+                output("UPDATE");
+                service.updatePolling(scheduler, pollRequest);
+            }else {
                 return Response.serverError().build();
             }
         } catch (ClassNotFoundException cnfe) {

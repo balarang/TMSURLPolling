@@ -45,14 +45,14 @@ public class SchneiderVisibiliyAPIPollJob extends JobBase {
         //output("BrokerRef: "+ getBrokerReference());
         map = jobExecutionContext.getMergedJobDataMap();
         //output("BrokerRef: "+ map.getString(BROKER_REFERENCE));
-        accessToken = getAccessToken();
         //output( String.format("Token %s, Ref %s", accessToken, getBrokerReference()));
         Response response = null;
         try {
+            accessToken = getAccessToken();
             response = get();
             if (response.getStatus() == Response.Status.OK.getStatusCode()) {
                 String json = response.readEntity( String.class );
-                output("Response from URL :" + json);
+                output("Response from Schneider URL :" + json);
                 if( json!= null ) {
                     ContentTypeHandler<SchneiderVisibilityAPIResponse[]> handler =
                             new ContentTypeHandler<SchneiderVisibilityAPIResponse[]>();
